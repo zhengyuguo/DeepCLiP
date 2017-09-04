@@ -14,25 +14,35 @@ SEQ_MAP = {
 def nucleotides_to_onehot(seq):
     return [SEQ_MAP[c] for c in seq]
 
+def add_noise(seq, prob = 0.05):
+    return ''.join([np.random.choice(['A','T','C','G']) if np.random.sample() < prob else c for c in seq]) 
+
 class dataLoader(object):
-    def __init__(self, file, pad = 27):
+    def __init__(self, file, pad = 27, prob = 0.75):
         self.file = file
         self.pad = pad
+        self.prob = prob
         self._load_file()
 
     def _load_file(self):
         with gzip.open(self.file, 'rt') as f:
             x, y = [], []
+            x_n = []
             for line in f:
                 line = line.rstrip('\n').split('\t')
                 seq, _, _, label = line[0], line[1], line[2], line[3]
+                noisy_seq = add_noise(seq, self.prob)
                 if self.pad != 0:
                     seq = seq + 'N' * self.pad
+                    noisy_seq = noisy_seq + 'N' * self.pad
                 seq_onehot = nucleotides_to_onehot(seq)
+                noisy_seq_onehot = nucleotides_to_onehot(noisy_seq)
                 x.append(seq_onehot)
+                x_n.append(noisy_seq_onehot)
                 y.append(int(label))
         self.x = np.array(x)
         self.y = np.array(y)
+        self.x_n = np.array(x_n)
 
 #DOT_MAP = {
 #        ".": [1, 0, 0], 

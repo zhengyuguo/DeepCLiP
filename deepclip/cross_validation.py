@@ -30,18 +30,11 @@ def cross_validation_aec(func, data_x, data_y, best_model_file = '/tmp/temp_aec.
         train, val = data_split(data_x, data_y)
         train_1 = lab1_data(*train)
         val_1   = lab1_data(*val)
-        train_model(aec, (train_1, train_1), (val_1, val_1), patience = AEC_PRE_PATIENCE, best_model_file = best_model_file)
+        train_model(aec, (train_1, train_1), (val_1, val_1), patience = AEC_PRE_PATIENCE, best_model_file = best_model_file, loss = AEC_LOSS)
         if no_fine:
             encoder.trainable = False
-        train_model(pred_model, train, val, patience = AEC_PRED_PATIENCE, best_model_file = best_model_file)
+        train_model(pred_model, train, val, patience = AEC_PRED_PATIENCE, best_model_file = best_model_file, optimizer = AEC_OPTIMIZER)
         pred_y = model_predict(pred_model, val[0], best_model_file)
         res_scores.append(scores(val[1], pred_y))
     return res_scores
 
-def mean_squared_error(y_true, y_pred):
-    return K.mean(K.square(y_pred - y_true), axis=-1)
-
-def aec_1d(y_true, y_pred):
-    m1 = mean_squared_error(y_true, y_pred * y_true)
-    m2 = mean_squared_error(y_true * 0, y_pred * (1-y_true))
-    return m1 * 3 + m2

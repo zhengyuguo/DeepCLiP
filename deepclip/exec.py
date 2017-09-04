@@ -10,7 +10,7 @@ __all__ = ['exec_cv', 'exec_train_test']
 
 def exec_cv(infile, model_func, AEC = False):
     if AEC:
-        data = dataLoader(infile, pad = 27)
+        data = dataLoader(infile, pad = 27 - 27)
         res = cross_validation_aec(model_func, data.x, data.y)
     else:
         data = dataLoader(infile, pad = 0)
@@ -19,10 +19,11 @@ def exec_cv(infile, model_func, AEC = False):
 
 def exec_train_test(train_file, test_file, model_func, AEC = False):
     if AEC:
-        train_data = dataLoader(train_file, pad = 27)
-        test_data = dataLoader(test_file, pad = 27)
+        train_data = dataLoader(train_file, pad = 27 - 27)
+        test_data = dataLoader(test_file, pad = 27 - 27)
         models = model_func(train_data.x.shape[1:]);
-        res = train_and_test_aec(*models, (train_data.x, train_data.y), (test_data.x, test_data.y))
+        #res = train_and_test_aec(*models, (train_data.x, train_data.y), (test_data.x, test_data.y))
+        res = train_and_test_aec(*models, (train_data.x, train_data.y, train_data.x_n), (test_data.x, test_data.y))
     else:
         train_data = dataLoader(train_file, pad = 0)
         test_data = dataLoader(test_file, pad = 0)
