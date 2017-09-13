@@ -44,6 +44,7 @@ def lab1_data(x, y):
 def train_and_test(model, training_data, test_data, best_model_file = '/tmp/temp_train_test.hdf5'):
     train, val = data_split(training_data[0], training_data[1])
     train_model(model, train, val, patience = PATIENCE, best_model_file = best_model_file)
+    model.load_weights(best_model_file)
     pred_y = model_predict(model, test_data[0], best_model_file)
     return perf_eval(test_data[1], pred_y)
 
@@ -53,6 +54,9 @@ def train_and_test_aec(aec, encoder, pred_model, training_data, test_data, best_
     val_1   = lab1_data(*val)
 
     train_model(aec, (train_1, train_1), (val_1, val_1), patience = AEC_PRE_PATIENCE, best_model_file = best_model_file, loss = AEC_LOSS)
+
+    aec.load_weights(best_model_file)
+
     pred_y = model_predict(aec, test_data[0], best_model_file)
     print(pred_y[0])
     print(test_data[0][0])
@@ -61,10 +65,14 @@ def train_and_test_aec(aec, encoder, pred_model, training_data, test_data, best_
     aec.layers[1].add_noise = False
     encoder.trainable = False
     train_model(pred_model, train, val, patience = AEC_PRED_PATIENCE, best_model_file = best_model_file) #, optimizer = AEC_OPTIMIZER)
+    pred_model.load_weights(best_model_file)
+    print(pred_model.summary())
+    print(pred_model.layers[1].add_noise)
 
     if not no_fine:
         encoder.trainable = True 
         train_model(pred_model, train, val, patience = AEC_PRED_PATIENCE, best_model_file = best_model_file, optimizer = AEC_OPTIMIZER)
+        pred_model.load_weights(best_model_file)
 
     pred_y = model_predict(pred_model, test_data[0], best_model_file)
     return perf_eval(test_data[1], pred_y)
