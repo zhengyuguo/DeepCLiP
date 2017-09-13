@@ -9,6 +9,7 @@ from keras.layers import Merge, Lambda
 from keras import backend as K
 from keras.constraints import unit_norm
 from keras import regularizers
+from deepclip.noise import UniformNoise
 
 __all__ = ['ideep_model', 'cnn_glob', 'cnn_auto', 'ideep_model_32', 'ideep_model_16']
 
@@ -74,24 +75,36 @@ def cnn_glob(input_shape = (128, 4)):
     model.add(Activation('sigmoid'))
     return model
 
-def cnn_auto(input_shape = (128, 4)):
+def cnn_auto_good(input_shape = (128, 4)):
     input_seq = Input(shape = input_shape)
     x = ZeroPadding1D(padding = (0, 104 - input_shape[0]))(input_seq)
-    x = conv1d_bn(x, 32, 7)
+    x = conv1d_bn(x, 16, 7)
     x = MaxPooling1D(pool_size = 3, strides = 2, padding = 'same')(x)
-    x = conv1d_bn(x, 16, 4)
-    x = MaxPooling1D(pool_size = 3, strides = 2, padding = 'same')(x)
-    x = conv1d_bn(x, 8, 4)
-    x = MaxPooling1D(pool_size = 3, strides = 2, padding = 'same')(x)
+    #x = conv1d_bn(x, 16, 4)
+    #x = MaxPooling1D(pool_size = 3, strides = 2, padding = 'same')(x)
+    #x = conv1d_bn(x, 8, 4)
+    #x = MaxPooling1D(pool_size = 3, strides = 2, padding = 'same')(x)
+
+    x = Flatten()(x)
+    x = Dropout(0.5)(x)
+    x = Dense(128, activation = 'relu')(x)
+    x = Dropout(0.5)(x)
+    x = Dense(48, activation = 'relu')(x)
 
     encoder = Model(input_seq, x)
     encoded = x
 
-    x = conv1d_bn(x, 8, 4)
-    x = UpSampling1D(2)(x)
+    x = Dropout(0.5)(x)
+    x = Dense(128, activation = 'relu')(x)
+    x = Dropout(0.5)(x)
+    x = Dense(832, activation = 'relu')(x)
+    x = Reshape((52, 16))(x)
+
+    #x = conv1d_bn(x, 8, 4)
+    #x = UpSampling1D(2)(x)
+    #x = conv1d_bn(x, 16, 4)
+    #x = UpSampling1D(2)(x)
     x = conv1d_bn(x, 16, 4)
-    x = UpSampling1D(2)(x)
-    x = conv1d_bn(x, 32, 7)
     x = UpSampling1D(2)(x)
     x = Convolution1D(filters = 4, kernel_size = 7, padding = 'same', activation = 'softmax')(x)
     x = Cropping1D(cropping=(0, 104 - input_shape[0]))(x)
@@ -99,46 +112,48 @@ def cnn_auto(input_shape = (128, 4)):
 
 
     final = Dropout(0.6)(encoded)
-    final = Flatten()(final)
-    final = Dense(48, activation = 'relu')(final)
-    final = Dropout(0.5)(final)
+    #final = Flatten()(final)
+    #final = Dense(48, activation = 'relu')(final)
+    #final = Dropout(0.5)(final)
     final = Dense(1, activation = 'sigmoid')(final)
     final = Model(input_seq, final)
     print(model.summary())
     print(final.summary())
     return model, encoder, final
 
-#def cnn_auto(input_shape = (128, 4)):
-#    input_seq = Input(shape = input_shape)
-#    x = ZeroPadding1D(padding = (0, 128 - input_shape[0]))(input_seq)
-#    x = conv1d_bn(x, 16, 7)
-#    x = MaxPooling1D(pool_size = 4, strides = 4, padding = 'same')(x)
-#    x = conv1d_bn(x, 32, 3)
-#    x = MaxPooling1D(pool_size = 4, strides = 4, padding = 'same')(x)
-#    x = conv1d_bn(x, 64, 3)
-#    x = MaxPooling1D(pool_size = 4, strides = 4, padding = 'same')(x)
-#
-#    encoder = Model(input_seq, x)
-#    encoded = x
-#
-#    x = conv1d_bn(x, 64, 3)
-#    x = UpSampling1D(4)(x)
-#    x = conv1d_bn(x, 32, 3)
-#    x = UpSampling1D(4)(x)
-#    x = conv1d_bn(x, 16, 7)
-#    x = UpSampling1D(4)(x)
-#    x = Convolution1D(filters = 4, kernel_size = 7, padding = 'same', activation = 'softmax')(x)
-#    x = Cropping1D(cropping=(0, 128 - input_shape[0]))(x)
-#    model = Model(input_seq, x)
-#
-#
-#    final = Dropout(0.6)(encoded)
-#    final = Flatten()(final)
-#    final = Dense(48, activation = 'relu')(final)
-#    final = Dropout(0.5)(final)
-#    final = Dense(1, activation = 'sigmoid')(final)
-#    final = Model(input_seq, final)
-#    print(model.summary())
-#    print(final.summary())
-#    return model, encoder, final
-#
+def cnn_auto(input_shape = (128, 4)):
+    input_seq = Input(shape = input_shape)
+    x = UniformNoise(rate = 0.2)(input_seq)
+    x = ZeroPadding1D(padding = (0, 104 - input_shape[0]))(x) #(input_seq)
+    x = conv1d_bn(x, 16, 7)
+    x = MaxPooling1D(pool_size = 2, strides = 2, padding = 'same')(x)
+
+    x = Flatten()(x)
+    x = Dropout(0.5)(x)
+    x = Dense(128, activation = 'relu')(x)
+    x = Dropout(0.5)(x)
+    x = Dense(48, activation = 'relu')(x)
+
+    encoder = Model(input_seq, x)
+    encoded = x
+
+    x = Dropout(0.5)(x)
+    x = Dense(64, activation = 'relu')(x)
+    x = Dropout(0.5)(x)
+    x = Dense(52 * 16, activation = 'relu')(x)
+    x = Reshape((52, 16))(x)
+
+    x = conv1d_bn(x, 16, 4)
+    x = UpSampling1D(2)(x)
+    x = Convolution1D(filters = 4, kernel_size = 7, padding = 'same', activation = 'softmax')(x)
+    x = Cropping1D(cropping=(0, 104 - input_shape[0]))(x)
+    model = Model(input_seq, x)
+
+
+    final = Dropout(0.6)(encoded)
+    final = Dense(1, activation = 'sigmoid')(final)
+    final = Model(input_seq, final)
+    print(model.summary())
+    print(final.summary())
+    return model, encoder, final
+
