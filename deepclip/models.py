@@ -75,36 +75,41 @@ def cnn_glob(input_shape = (128, 4)):
     model.add(Activation('sigmoid'))
     return model
 
-def cnn_auto_good(input_shape = (128, 4)):
+def cnn_auto(input_shape = (128, 4)):
     input_seq = Input(shape = input_shape)
-    x = ZeroPadding1D(padding = (0, 104 - input_shape[0]))(input_seq)
+    x = UniformNoise(rate = 0.2)(input_seq)
+    x = ZeroPadding1D(padding = (0, 104 - input_shape[0]))(x) #(input_seq)
+    x = conv1d_bn(x, 32, 7)
+    x = MaxPooling1D(pool_size = 3, strides = 2, padding = 'same')(x)
     x = conv1d_bn(x, 16, 7)
     x = MaxPooling1D(pool_size = 3, strides = 2, padding = 'same')(x)
-    #x = conv1d_bn(x, 16, 4)
-    #x = MaxPooling1D(pool_size = 3, strides = 2, padding = 'same')(x)
-    #x = conv1d_bn(x, 8, 4)
-    #x = MaxPooling1D(pool_size = 3, strides = 2, padding = 'same')(x)
+    x = conv1d_bn(x, 16, 7)
+    x = MaxPooling1D(pool_size = 3, strides = 2, padding = 'same')(x)
 
     x = Flatten()(x)
     x = Dropout(0.5)(x)
-    x = Dense(128, activation = 'relu')(x)
-    x = Dropout(0.5)(x)
-    x = Dense(48, activation = 'relu')(x)
+    #x = Dense(64, activation = 'relu')(x)
+    #x = Dropout(0.5)(x)
+    x = Dense(32, activation = 'relu')(x)
 
     encoder = Model(input_seq, x)
     encoded = x
 
     x = Dropout(0.5)(x)
-    x = Dense(128, activation = 'relu')(x)
-    x = Dropout(0.5)(x)
-    x = Dense(832, activation = 'relu')(x)
-    x = Reshape((52, 16))(x)
+    #x = Dense(64, activation = 'relu')(x)
+    #x = Dropout(0.5)(x)
+    #x = Dense(832, activation = 'relu')(x)
+    #x = Reshape((52, 16))(x)
+    #x = Dense(416, activation = 'relu')(x)
+    #x = Reshape((26, 16))(x)
+    x = Dense(208, activation = 'relu')(x)
+    x = Reshape((13, 16))(x)
 
-    #x = conv1d_bn(x, 8, 4)
-    #x = UpSampling1D(2)(x)
-    #x = conv1d_bn(x, 16, 4)
-    #x = UpSampling1D(2)(x)
-    x = conv1d_bn(x, 16, 4)
+    x = conv1d_bn(x, 16, 7)
+    x = UpSampling1D(2)(x)
+    x = conv1d_bn(x, 16, 7)
+    x = UpSampling1D(2)(x)
+    x = conv1d_bn(x, 32, 7)
     x = UpSampling1D(2)(x)
     x = Convolution1D(filters = 4, kernel_size = 7, padding = 'same', activation = 'softmax')(x)
     x = Cropping1D(cropping=(0, 104 - input_shape[0]))(x)
@@ -122,6 +127,51 @@ def cnn_auto_good(input_shape = (128, 4)):
     return model, encoder, final
 
 def cnn_auto(input_shape = (128, 4)):
+    input_seq = Input(shape = input_shape)
+    x = UniformNoise(rate = 0.2)(input_seq)
+    x = ZeroPadding1D(padding = (0, 108 - input_shape[0]))(x) #(input_seq)
+    x = conv1d_bn(x, 16, 7, padding = 'valid')
+    x = conv1d_bn(x, 16, 7, padding = 'valid')
+    x = MaxPooling1D(pool_size = 2, strides = 2)(x)
+    x = conv1d_bn(x, 16, 7, padding = 'valid')
+    x = conv1d_bn(x, 32, 7, padding = 'valid')
+    x = MaxPooling1D(pool_size = 2, strides = 2)(x)
+    x = conv1d_bn(x, 32, 7, padding = 'valid')
+    x = conv1d_bn(x, 64, 7, padding = 'valid')
+    x = MaxPooling1D(pool_size = 2, strides = 2)(x)
+
+    x = Flatten()(x)
+    x = Dropout(0.5)(x)
+    x = Dense(32, activation = 'relu')(x)
+
+    encoder = Model(input_seq, x)
+    encoded = x
+
+    x = Dropout(0.5)(x)
+    x = Dense(384, activation = 'relu')(x)
+    x = Reshape((24, 16))(x)
+
+    x = conv1d_bn(x, 16, 7, padding = 'valid')
+    x = UpSampling1D(2)(x)
+    x = conv1d_bn(x, 16, 7, padding = 'valid')
+    x = UpSampling1D(2)(x)
+    x = conv1d_bn(x, 16, 7, padding = 'valid')
+    x = UpSampling1D(2)(x)
+    x = Convolution1D(filters = 4, kernel_size = 7, padding = 'valid', activation = 'softmax')(x)
+    x = Cropping1D(cropping=(0, 102 - input_shape[0]))(x)
+    model = Model(input_seq, x)
+
+
+    final = Dropout(0.5)(encoded)
+    #final = Flatten()(final)
+    #final = Dense(48, activation = 'relu')(final)
+    #final = Dropout(0.5)(final)
+    final = Dense(1, activation = 'sigmoid')(final)
+    final = Model(input_seq, final)
+    print(model.summary())
+    print(final.summary())
+    return model, encoder, final
+def cnn_auto_good(input_shape = (128, 4)):
     input_seq = Input(shape = input_shape)
     x = UniformNoise(rate = 0.2)(input_seq)
     x = ZeroPadding1D(padding = (0, 104 - input_shape[0]))(x) #(input_seq)

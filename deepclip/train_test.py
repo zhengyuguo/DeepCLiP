@@ -48,7 +48,7 @@ def train_and_test(model, training_data, test_data, best_model_file = '/tmp/temp
     pred_y = model_predict(model, test_data[0], best_model_file)
     return perf_eval(test_data[1], pred_y)
 
-def train_and_test_aec(aec, encoder, pred_model, training_data, test_data, best_model_file = '/tmp/temp_train_test.hdf5', no_fine = False):
+def train_and_test_aec(aec, encoder, pred_model, training_data, test_data, best_model_file = '/tmp/temp_train_test_aec.hdf5', no_fine = False):
     train, val = data_split(training_data[0], training_data[1])
     train_1 = lab1_data(*train)
     val_1   = lab1_data(*val)
@@ -61,13 +61,11 @@ def train_and_test_aec(aec, encoder, pred_model, training_data, test_data, best_
     print(pred_y[0])
     print(test_data[0][0])
 
-    print(aec.layers[1])
+    #print(aec.layers[1])
     aec.layers[1].add_noise = False
     encoder.trainable = False
     train_model(pred_model, train, val, patience = AEC_PRED_PATIENCE, best_model_file = best_model_file) #, optimizer = AEC_OPTIMIZER)
     pred_model.load_weights(best_model_file)
-    print(pred_model.summary())
-    print(pred_model.layers[1].add_noise)
 
     if not no_fine:
         encoder.trainable = True 
