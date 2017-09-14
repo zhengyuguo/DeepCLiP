@@ -2,6 +2,7 @@
 # vim: set noexpandtab tabstop=2:
 
 datadir=/Users/zhengyuguo/Downloads/datasets
+datadir=./new_data/datasets
 outdir=$(pwd)/res
 
 export PYTHONPATH="$(pwd):$PYTHONPATH"
@@ -16,7 +17,8 @@ do
 	obname=$dname/$script_name
 	echo "./run_scripts/$script_name.py" "$tn/down_sampled.txt.gz" "$tt/down_sampled.txt.gz" "$obname"
 	"./run_scripts/$script_name.py" "$tn/down_sampled.txt.gz" "$tt/down_sampled.txt.gz" "$obname"
-done < <(paste.sh <(find.sh -d "$datadir" -n training_sample_0 | sort.sh) <(find.sh -d "$datadir" -n test_sample_0 | sort.sh))
+#done < <(paste.sh <(find.sh -d "$datadir" -n training_sample_0 | sort.sh) <(find.sh -d "$datadir" -n test_sample_0 | sort.sh))
+done < <(paste.sh <(find.sh -d "$datadir" -n tn_merge | sort.sh) <(find.sh -d "$datadir" -n tt_merge | sort.sh))
 }
 
 #cmd ideep_tt
