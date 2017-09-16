@@ -13,4 +13,5 @@ scores = deepclip.exec_cv(train_file, deepclip.cnn_auto, AEC = True)
 with open(outfile + '.txt', 'w') as f:
     for i in scores:
         i = [str(j) for j in i]
+        print('\t'.join(i) + '\n')
         f.write('\t'.join(i) + '\n')

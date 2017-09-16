@@ -4,7 +4,7 @@
 import numpy as np
 from keras.models import Model, Sequential
 from keras.layers import Input, Dense, Reshape, Dropout, Activation, Flatten, BatchNormalization
-from keras.layers import Convolution1D, MaxPooling1D, UpSampling1D, GlobalAveragePooling1D, ZeroPadding1D, Cropping1D
+from keras.layers import Convolution1D, MaxPooling1D, UpSampling1D, GlobalMaxPooling1D, ZeroPadding1D, Cropping1D
 from keras.layers import Merge, Lambda
 from keras import backend as K
 from keras.constraints import unit_norm
@@ -68,7 +68,7 @@ def ideep_model_16(input_shape = (128, 4)):
 def cnn_glob(input_shape = (128, 4)):
     model = Sequential()
     model.add(Convolution1D(input_shape=input_shape, filters = 128, kernel_size = 24, padding = 'valid', activation="relu", strides=1))
-    model.add(GlobalAveragePooling1D())
+    model.add(GlobalMaxPooling1D())
     model.add(Dense(32, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(1))
@@ -128,49 +128,45 @@ def cnn_auto(input_shape = (128, 4)):
 
 def cnn_auto(input_shape = (128, 4)):
     input_seq = Input(shape = input_shape)
-    x = UniformNoise(rate = 0.2)(input_seq)
+    x = UniformNoise(rate = 0.1)(input_seq)
     x = ZeroPadding1D(padding = (0, 108 - input_shape[0]))(x) #(input_seq)
-    x = conv1d_bn(x, 16, 7, padding = 'valid')
-    x = conv1d_bn(x, 16, 7, padding = 'valid')
+    x = conv1d_bn(x, 32, 10, padding = 'valid')
+    x = conv1d_bn(x, 128, 10, padding = 'valid')
     x = MaxPooling1D(pool_size = 2, strides = 2)(x)
-    x = conv1d_bn(x, 16, 7, padding = 'valid')
-    x = conv1d_bn(x, 32, 7, padding = 'valid')
+    x = conv1d_bn(x, 128, 7, padding = 'valid')
     x = MaxPooling1D(pool_size = 2, strides = 2)(x)
-    x = conv1d_bn(x, 32, 7, padding = 'valid')
-    x = conv1d_bn(x, 64, 7, padding = 'valid')
+    x = conv1d_bn(x, 128, 7, padding = 'valid')
     x = MaxPooling1D(pool_size = 2, strides = 2)(x)
 
     x = Flatten()(x)
-    x = Dropout(0.5)(x)
+    x = Dropout(0.4)(x)
     x = Dense(32, activation = 'relu')(x)
 
     encoder = Model(input_seq, x)
     encoded = x
 
-    x = Dropout(0.5)(x)
-    x = Dense(384, activation = 'relu')(x)
-    x = Reshape((24, 16))(x)
+    x = Dropout(0.4)(x)
+    x = Dense(384 * 2, activation = 'relu')(x)
+    x = Reshape((24, 16 * 2))(x)
 
-    x = conv1d_bn(x, 16, 7, padding = 'valid')
+    x = conv1d_bn(x, 32, 7, padding = 'valid')
     x = UpSampling1D(2)(x)
-    x = conv1d_bn(x, 16, 7, padding = 'valid')
+    x = conv1d_bn(x, 32, 7, padding = 'valid')
     x = UpSampling1D(2)(x)
-    x = conv1d_bn(x, 16, 7, padding = 'valid')
+    x = conv1d_bn(x, 32, 7, padding = 'valid')
     x = UpSampling1D(2)(x)
     x = Convolution1D(filters = 4, kernel_size = 7, padding = 'valid', activation = 'softmax')(x)
     x = Cropping1D(cropping=(0, 102 - input_shape[0]))(x)
     model = Model(input_seq, x)
 
 
-    final = Dropout(0.5)(encoded)
-    #final = Flatten()(final)
-    #final = Dense(48, activation = 'relu')(final)
-    #final = Dropout(0.5)(final)
+    final = encoded
     final = Dense(1, activation = 'sigmoid')(final)
     final = Model(input_seq, final)
     print(model.summary())
     print(final.summary())
     return model, encoder, final
+
 def cnn_auto_good(input_shape = (128, 4)):
     input_seq = Input(shape = input_shape)
     x = UniformNoise(rate = 0.2)(input_seq)

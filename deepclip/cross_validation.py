@@ -14,15 +14,16 @@ def cross_validation(func, data_x, data_y, best_model_file = '/tmp/temp.hdf5'):
     for train_idx, val_idx in skf.split(data_x, data_y):
         model = func(input_shape = data_x.shape[1:])
         perf = train_and_test(model, (data_x[train_idx], data_y[train_idx]), (data_x[val_idx], data_y[val_idx]), best_model_file = best_model_file)
+        print(perf[0])
         res_scores.append(perf[0])
     return res_scores
 
-def cross_validation_aec(func, data_x, data_y, best_model_file = '/tmp/temp_aec.hdf5', nofine = False):
+def cross_validation_aec(func, data_x, data_y, best_model_file = '/tmp/temp_aec.hdf5', no_fine = False):
     skf = StratifiedKFold(n_splits = FOLD, shuffle = True)
     res_scores = list()
     for train_idx, val_idx in skf.split(data_x, data_y):
         aec, encoder, pred_model = func(input_shape = data_x.shape[1:])
-        perf = train_and_test_aec(aec, encoder, pred_model, (data_x[train_idx], data_y[train_idx]), (data_x[val_idx], data_y[val_idx]), best_model_file = best_model_file, nofine = nofine)
+        perf = train_and_test_aec(aec, encoder, pred_model, (data_x[train_idx], data_y[train_idx]), (data_x[val_idx], data_y[val_idx]), best_model_file = best_model_file, no_fine = no_fine)
+        print(perf[0])
         res_scores.append(perf[0])
     return res_scores
-

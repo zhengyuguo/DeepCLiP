@@ -3,7 +3,7 @@
 
 datadir=/Users/zhengyuguo/Downloads/datasets
 datadir=./new_data/datasets
-outdir=$(pwd)/res
+outdir=$(pwd)/res_cv
 
 export PYTHONPATH="$(pwd):$PYTHONPATH"
 
@@ -23,6 +23,9 @@ done < <(paste.sh <(find.sh -d "$datadir" -n tn_merge | sort.sh) <(find.sh -d "$
 
 #cmd ideep_tt
 #cmd cnn_glob_tt
-cmd cnn_auto_tt
+#cmd cnn_auto_tt
 #cmd ideep_32_tt
 #cmd ideep_16_tt
+#cmd cnn_glob_cv
+#cmd ideep_cv
+cmd cnn_auto_cv
