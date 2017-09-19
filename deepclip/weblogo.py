@@ -14,7 +14,12 @@ def get_feature(model, X_batch, index):
     activations =  _convout1_f([0] + [X_batch])
     return activations[0]
 
-def logo_kmers(filter_outs, filter_size, seqs, filename):
+def logo_kmers(filter_outs, filter_size, seqs, filename, max_pct = 0.5):
+    all_outs = np.ravel(filter_outs)
+    all_outs_mean = all_outs.mean()
+    all_outs_norm = all_outs - all_outs_mean
+    raw_t = maxpct_t * all_outs_norm.max() + all_outs_mean
+
     with open(filename, 'w') as f:
         for i in range(filter_outs.shape[0]):
             for j in range(filter_outs.shape[1]):
