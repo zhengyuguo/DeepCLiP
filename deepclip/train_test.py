@@ -7,7 +7,7 @@ from deepclip.perf_eval import perf_eval
 from deepclip.config import *
 from sklearn.model_selection import StratifiedKFold
 
-__all__ = ['train_model', 'model_predict', 'data_split', 'lab1_data', 'train_and_test', 'train_and_test_aec', 'train_and_test_aec_2']
+__all__ = ['train_model', 'model_predict', 'data_split', 'lab1_data', 'train_and_test', 'train_and_test_aec']
 
 def train_model(model, training_data, validation_data, patience, best_model_file = '/tmp/best_model.hdf5', loss = LOSS, optimizer = OPTIMIZER):
 
@@ -75,23 +75,6 @@ def train_and_test_aec(aec, encoder, pred_model, training_data, test_data, best_
     pred_y = model_predict(pred_model, test_data[0], best_model_file)
     return perf_eval(test_data[1], pred_y)
 
-#def train_and_test_aec(aec, encoder, pred_model, training_data, test_data, best_model_file = '/tmp/temp_train_test.hdf5', no_fine = False):
-#    train, val = data_split(training_data[0], training_data[1])
-#    train_1 = lab1_data(*train)
-#    val_1   = lab1_data(*val)
-#
-#    train_model(aec, (train_1, train_1), (val_1, val_1), patience = AEC_PRE_PATIENCE, best_model_file = best_model_file, loss = AEC_LOSS)
-#
-#    encoder.trainable = False
-#    train_model(pred_model, train, val, patience = AEC_PRED_PATIENCE, best_model_file = best_model_file, optimizer = AEC_OPTIMIZER)
-#
-#    if not no_fine:
-#        encoder.trainable = True 
-#        train_model(pred_model, train, val, patience = AEC_PRED_PATIENCE, best_model_file = best_model_file, optimizer = AEC_OPTIMIZER)
-#
-#    pred_y = model_predict(pred_model, test_data[0], best_model_file)
-#    return perf_eval(test_data[1], pred_y)
-
 def train_aec(aec, training_data, best_model_file = '/tmp/temp_train_aec.hdf5'):
     train, val, n_train, n_val = data_split2(training_data[0], training_data[1], training_data[2])
     train_1 = lab1_data(*train)
@@ -101,19 +84,3 @@ def train_aec(aec, training_data, best_model_file = '/tmp/temp_train_aec.hdf5'):
     n_val_1   = lab1_data(*n_val)
 
     train_model(aec, (n_train_1, train_1), (n_val_1, val_1), patience = AEC_PRE_PATIENCE, best_model_file = best_model_file, loss = AEC_LOSS)
-
-def train_and_test_aec_2(aec, encoder, pred_model, training_data_aec, training_data, test_data, best_model_file = '/tmp/temp_train_test.hdf5', no_fine = False):
-    train_aec(aec, training_data_aec)
-
-    train, val, n_train, n_val = data_split2(training_data[0], training_data[1], training_data[2])
-
-    encoder.trainable = False
-    train_model(pred_model, train, val, patience = AEC_PRED_PATIENCE, best_model_file = best_model_file)
-
-    if not no_fine:
-        encoder.trainable = True 
-        train_model(pred_model, train, val, patience = AEC_PRED_PATIENCE, best_model_file = best_model_file, optimizer = AEC_OPTIMIZER)
-
-    pred_y = model_predict(pred_model, test_data[0], best_model_file)
-    return perf_eval(test_data[1], pred_y)
-

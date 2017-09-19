@@ -7,3 +7,5 @@ from deepclip.cross_validation import *
 from deepclip.models import *
 from deepclip.perf_eval import *
 from deepclip.exec import *
+from deepclip.noise import *
+from deepclip.weblogo import *

@@ -15,7 +15,7 @@ def nucleotides_to_onehot(seq):
     return [SEQ_MAP[c] for c in seq]
 
 class dataLoader(object):
-    def __init__(self, file, pad = 27, prob = 0.0):
+    def __init__(self, file, pad = 0, prob = 0.0):
         self.file = file
         self.pad = pad
         self.prob = prob
@@ -23,7 +23,7 @@ class dataLoader(object):
 
     def _load_file(self):
         with gzip.open(self.file, 'rt') as f:
-            x, y = [], []
+            x, y, seqs = [], [], []
             for line in f:
                 line = line.rstrip('\n').split('\t')
                 seq, _, _, label = line[0], line[1], line[2], line[3]
@@ -32,5 +32,7 @@ class dataLoader(object):
                 seq_onehot = nucleotides_to_onehot(seq)
                 x.append(seq_onehot)
                 y.append(int(label))
+                seqs.append(seq)
         self.x = np.array(x)
         self.y = np.array(y)
+        self.seqs = np.array(seqs)

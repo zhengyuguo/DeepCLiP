@@ -5,7 +5,7 @@ from keras import backend as K
 from keras import optimizers
 
 # Training Hyper-param
-EPOCHS = 100
+EPOCHS = 1#00
 BATCH_SIZE = 100
 OPTIMIZER = 'rmsprop'
 LOSS = 'binary_crossentropy'
