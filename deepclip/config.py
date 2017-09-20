@@ -5,7 +5,7 @@ from keras import backend as K
 from keras import optimizers
 
 # Training Hyper-param
-EPOCHS = 1#00
+EPOCHS = 100
 BATCH_SIZE = 100
 OPTIMIZER = 'rmsprop'
 LOSS = 'binary_crossentropy'
@@ -19,5 +19,5 @@ AEC_PRE_PATIENCE = 5
 AEC_PRED_PATIENCE = 5
 
 AEC_LOSS = 'mse' #'categorical_crossentropy'
-AEC_OPTIMIZER = optimizers.RMSprop(lr = 0.0003)
+AEC_OPTIMIZER = optimizers.RMSprop(lr = 0.0001)
 #AEC_OPTIMIZER = OPTIMIZER

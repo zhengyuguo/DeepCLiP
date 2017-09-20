@@ -23,7 +23,7 @@ def logo_kmers(filter_outs, filter_size, seqs, filename, maxpct_t = 0.7):
     with open(filename, 'w') as f:
         for i in range(filter_outs.shape[0]):
             for j in range(filter_outs.shape[1]):
-                if filter_outs[i,j] > 0.0:
+                if filter_outs[i,j] > raw_t:
                     kmer = seqs[i][j:j+filter_size]
                     if len(kmer) <filter_size:
                         continue
