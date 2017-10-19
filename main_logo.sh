@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # vim: set noexpandtab tabstop=2:
 
-datadir=/Users/zhengyuguo/Downloads/datasets
-datadir=./new_data/datasets
+datadir=./datasets
 outdir=$(pwd)/res_logo
 
 export PYTHONPATH="$(pwd):$PYTHONPATH"
@@ -20,8 +19,8 @@ do
 done < <(find.sh -d "$datadir" -n tn_merge | sort.sh)
 }
 
-#cmd ideep_weblogo
-cmd cnn_auto_weblogo
+cmd ideep_weblogo
+#cmd cnn_auto_weblogo
 #cmd ideep_tt
 #cmd cnn_glob_tt
 #cmd cnn_auto_tt
